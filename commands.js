@@ -1,38 +1,47 @@
-const fs = require('fs');
+const { SlashCommandBuilder } = require('discord.js');
 
-module.exports = {
-    name: "maj",
-    description: "Met à jour une matière première ou un produit fini",
-    options: [
-        {
-            name: "item",
-            description: "Nom de la matière ou du produit",
-            type: 3,
-            required: true
-        },
-        {
-            name: "quantite",
-            description: "Quantité à ajouter ou retirer",
-            type: 4,
-            required: true
-        }
-    ],
+module.exports = [
+    new SlashCommandBuilder()
+        .setName('stock')
+        .setDescription('Affiche le stock actuel'),
 
-    async execute(interaction) {
-        const item = interaction.options.getString("item");
-        const quantite = interaction.options.getInteger("quantite");
+    new SlashCommandBuilder()
+        .setName('recolte')
+        .setDescription('Enregistrer une récolte')
+        .addStringOption(option =>
+            option.setName('matiere')
+                .setDescription('Matière récoltée')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'Fentanyl', value: 'Fentanyl' },
+                    { name: 'Xylazine', value: 'Xylazine' },
+                    { name: 'Belladone', value: 'Belladone' },
+                    { name: 'Feuilles', value: 'Feuilles' },
+                    { name: 'Acide Sulfurique', value: 'Acide Sulfurique' },
+                    { name: 'Amanita Rouge', value: 'Amanita Rouge' },
+                    { name: 'Amanita Vert', value: 'Amanita Vert' },
+                    
+                ))
+        .addIntegerOption(option =>
+            option.setName('quantite')
+                .setDescription('Quantité récoltée')
+                .setRequired(true))
+        .addUserOption(option =>
+            option.setName('personne')
+                .setDescription('Qui a récolté ?')
+                .setRequired(true)),
 
-        let stock = JSON.parse(fs.readFileSync("stock.json", "utf8"));
+    new SlashCommandBuilder()
+        .setName('maj')
+        .setDescription('Met à jour une matière première ou un produit fini')
+        .addStringOption(option =>
+            option.setName('item')
+                .setDescription('Nom de la matière ou du produit')
+                .setRequired(true))
+        .addIntegerOption(option =>
+            option.setName('quantite')
+                .setDescription('Quantité à ajouter ou retirer')
+                .setRequired(true)),
+];
 
-        if (stock[item] !== undefined) {
-            stock[item] += quantite;
-            if (stock[item] < 0) stock[item] = 0;
-
-            fs.writeFileSync("stock.json", JSON.stringify(stock, null, 2));
-            return interaction.reply(`🔧 Mise à jour effectuée : **${item}** → ${stock[item]} unités`);
-        }
-
-        return interaction.reply(`❌ L'item **${item}** n'existe pas dans le stock.`);
-    }
-};
 

@@ -5,16 +5,6 @@ console.log("TOKEN =", JSON.stringify(process.env.TOKEN));
 const fs = require('fs');
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const stock = require('./commands/stock');
-const recolte = require('./commands/recolte');
-const maj = require('./commands/maj');
-
-const commands = new Map();
-
-
-commands.set(stock.name, stock);
-commands.set(recolte.name, recolte);
-commands.set(maj.name, maj);
 
 
 const client = new Client({
@@ -163,6 +153,30 @@ client.on('interactionCreate', async interaction => {
                 `❌ Stock insuffisant pour produire **${quantite} ${produit}**.\n` +
                 `Il manque : **${matiere}**`
             );
+
+            if (interaction.commandName === 'maj') {
+    const item = interaction.options.getString('item');
+    const quantite = interaction.options.getInteger('quantite');
+
+    const stock = loadStock();
+
+    if (stock[item] === undefined) {
+        return interaction.reply(`❌ L'item **${item}** n'existe pas dans le stock.`);
+    }
+
+    stock[item] += quantite;
+
+    if (stock[item] < 0) stock[item] = 0;
+
+    saveStock(stock);
+
+    return interaction.reply(
+        `🔧 Mise à jour effectuée :\n\n` +
+        `• Item : **${item}**\n` +
+        `• Nouvelle quantité : **${stock[item]}**`
+    );
+}
+
         }
     }
 
