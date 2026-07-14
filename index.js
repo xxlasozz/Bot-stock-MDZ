@@ -7,7 +7,10 @@ const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
 const client = new Client({
-    intents: [GatewayIntentBits.Guilds],
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers   // ⭐ INTENT AJOUTÉ
+    ],
     partials: [Partials.Channel]
 });
 
@@ -242,7 +245,7 @@ client.on('interactionCreate', async interaction => {
     // /allcompta
     // ----------------------
     if (interaction.commandName === 'allcompta') {
-        const membres = await interaction.guild.members.fetch();
+        const membres = await interaction.guild.members.fetch(); // ⭐ fonctionne maintenant
 
         const quotas = {};
 
@@ -253,13 +256,11 @@ client.on('interactionCreate', async interaction => {
 
         for (const entry of compta) {
             if (entry.type === "recolte") {
-                if (!quotas[entry.user]) quotas[entry.user] = { recoltes: 0, labos: 0 };
                 quotas[entry.user].recoltes += entry.quantite;
             }
 
             if (entry.type === "labo") {
                 for (const participant of entry.participants) {
-                    if (!quotas[participant]) quotas[participant] = { recoltes: 0, labos: 0 };
                     quotas[participant].labos += entry.quantite;
                 }
             }
