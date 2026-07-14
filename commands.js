@@ -21,7 +21,7 @@ module.exports = [
                     { name: 'Amanita Rouge', value: 'Amanita Rouge' },
                     { name: 'Amanita Vert', value: 'Amanita Vert' },
                 ))
-                
+
         .addIntegerOption(option =>
             option.setName('quantite')
                 .setDescription('Quantité récoltée')
@@ -32,14 +32,29 @@ module.exports = [
                 .setRequired(true)),
 
     new SlashCommandBuilder()
-        .setName('maj')
-        .setDescription('Met à jour une matière première ou un produit fini')
-        .addStringOption(option =>
-            option.setName('item')
-                .setDescription('Nom de la matière ou du produit')
-                .setRequired(true))
-        .addIntegerOption(option =>
-            option.setName('quantite')
-                .setDescription('Quantité à ajouter ou retirer')
-                .setRequired(true)),
+    .setName('maj')
+    .setDescription('Met à jour une matière première ou un produit fini')
+    .addStringOption(option =>
+        option.setName('item')
+            .setDescription('Nom de la matière ou du produit')
+            .setRequired(true)
+            .addChoices(
+                { name: 'Fentanyl', value: 'Fentanyl' },
+                { name: 'Xylazine', value: 'Xylazine' },
+                { name: 'Belladone', value: 'Belladone' },
+                { name: 'Feuilles', value: 'Feuilles' },
+                { name: 'Acide Sulfurique', value: 'Acide Sulfurique' },
+                { name: 'Amanita Rouge', value: 'Amanita Rouge' },
+                { name: 'Amanita Vert', value: 'Amanita Vert' },
+
+                // Produits finis
+                { name: 'Tranq', value: 'Tranq' },
+                { name: 'Cocaïne', value: 'Cocaïne' },
+                { name: 'Mexicana', value: 'Mexicana' },
+            ))
+    .addIntegerOption(option =>
+        option.setName('quantite')
+            .setDescription('Quantité à ajouter ou retirer')
+            .setRequired(true)),
+
 ];
