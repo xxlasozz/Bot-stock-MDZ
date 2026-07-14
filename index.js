@@ -278,7 +278,7 @@ if (interaction.commandName === 'transac') {
 
     // Prix unitaires
     const prix = {
-        "Tranq": 150,
+        "Tranq": 110,
         "Cocaïne": 320,
         "Mexicana": 210
     };
