@@ -218,6 +218,14 @@ client.on('interactionCreate', async interaction => {
     // ----------------------
     // /quota
     // ----------------------
+
+    // ❌ Exclure le rôle GGO
+const roleGGO = interaction.guild.roles.cache.find(r => r.name === "GGO");
+if (roleGGO && membre.roles.cache.has(roleGGO.id)) {
+    return interaction.reply("⛔ Ce membre est exclu de la compta.");
+}
+
+
     if (interaction.commandName === 'quota') {
         const membre = interaction.options.getUser('membre');
 
@@ -251,9 +259,15 @@ client.on('interactionCreate', async interaction => {
         const quotas = {};
 
         membres.forEach(m => {
-            if (m.user.bot) return;
-            quotas[m.id] = { recoltes: 0, labos: 0 };
-        });
+    if (m.user.bot) return;
+
+    // ❌ Exclure le rôle GGO
+    const roleGGO = interaction.guild.roles.cache.find(r => r.name === "GGO");
+    if (roleGGO && m.roles.cache.has(roleGGO.id)) return;
+
+    quotas[m.id] = { recoltes: 0, labos: 0 };
+});
+
 
         for (const entry of compta) {
             if (entry.type === "recolte") {
@@ -262,9 +276,21 @@ client.on('interactionCreate', async interaction => {
 
             if (entry.type === "labo") {
     for (const participant of entry.participants) {
-        if (!quotas[participant]) quotas[participant] = { recoltes: 0, labos: 0 };
-        quotas[participant].labos++; // ✔ compte 1 labo par action
-    }
+
+    // Récupérer le membre dans le serveur
+    const membre = membres.get(participant);
+
+    // Trouver le rôle GGO
+    const roleGGO = interaction.guild.roles.cache.find(r => r.name === "GGO");
+
+    // ❌ Si le membre a le rôle GGO → on ignore
+    if (roleGGO && membre.roles.cache.has(roleGGO.id)) continue;
+
+    // ✔ Sinon → on compte normalement
+    if (!quotas[participant]) quotas[participant] = { recoltes: 0, labos: 0 };
+    quotas[participant].labos++;
+}
+
 }
 
         }
