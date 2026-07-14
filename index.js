@@ -230,8 +230,9 @@ client.on('interactionCreate', async interaction => {
             }
 
             if (entry.type === "labo" && entry.participants.includes(membre.id)) {
-                labos += entry.quantite;
-            }
+    labos++; // ✔ compte 1 labo par action
+}
+
         }
 
         return interaction.reply(
@@ -260,10 +261,12 @@ client.on('interactionCreate', async interaction => {
             }
 
             if (entry.type === "labo") {
-                for (const participant of entry.participants) {
-                    quotas[participant].labos += entry.quantite;
-                }
-            }
+    for (const participant of entry.participants) {
+        if (!quotas[participant]) quotas[participant] = { recoltes: 0, labos: 0 };
+        quotas[participant].labos++; // ✔ compte 1 labo par action
+    }
+}
+
         }
 
         let msg = "📊 **Compta globale du serveur**\n\n";
