@@ -9,7 +9,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMembers   // ⭐ INTENT AJOUTÉ
+        GatewayIntentBits.GuildMembers
     ],
     partials: [Partials.Channel]
 });
@@ -73,6 +73,9 @@ client.on('interactionCreate', async interaction => {
     const stock = loadStock();
     const compta = loadCompta();
 
+    // Rôle GGO
+    const roleGGO = interaction.guild.roles.cache.find(r => r.name === "GGO");
+
     // ----------------------
     // /stock
     // ----------------------
@@ -103,6 +106,12 @@ client.on('interactionCreate', async interaction => {
         const matiere = interaction.options.getString('matiere');
         const quantite = interaction.options.getInteger('quantite');
         const personne = interaction.options.getUser('personne');
+
+        // ❌ Exclure GGO
+        const membre = interaction.guild.members.cache.get(personne.id);
+        if (roleGGO && membre.roles.cache.has(roleGGO.id)) {
+            return interaction.reply("⛔ Ce membre est exclu de la compta.");
+        }
 
         stock[matiere] += quantite;
         saveStock(stock);
@@ -189,6 +198,17 @@ client.on('interactionCreate', async interaction => {
             );
         }
 
+        // ❌ Exclure GGO des participants
+        const membres = await interaction.guild.members.fetch();
+        const participantsFiltrés = participants.filter(id => {
+            const m = membres.get(id);
+            return !(roleGGO && m.roles.cache.has(roleGGO.id));
+        });
+
+        if (participantsFiltrés.length === 0) {
+            return interaction.reply("⛔ Tous les participants sont GGO, labo ignoré.");
+        }
+
         for (const matiere in req) {
             stock[matiere] -= req[matiere] * quantite;
         }
@@ -200,7 +220,7 @@ client.on('interactionCreate', async interaction => {
             type: "labo",
             produit,
             quantite,
-            participants,
+            participants: participantsFiltrés,
             date: new Date().toLocaleString('fr-FR', { timeZone: 'Europe/Paris' })
         });
         saveCompta(compta);
@@ -209,7 +229,7 @@ client.on('interactionCreate', async interaction => {
             `🧪 **Production labo enregistrée !**\n\n` +
             `• Produit : **${produit}**\n` +
             `• Quantité : **${quantite}**\n` +
-            `• Participants : ${participantsRaw}\n` +
+            `• Participants : ${participantsFiltrés.map(id => `<@${id}>`).join(" ")}\n` +
             `• Heure : ${new Date().toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris' })}\n\n` +
             `Stock mis à jour ✔️`
         );
@@ -218,16 +238,14 @@ client.on('interactionCreate', async interaction => {
     // ----------------------
     // /quota
     // ----------------------
-
-    // ❌ Exclure le rôle GGO
-const roleGGO = interaction.guild.roles.cache.find(r => r.name === "GGO");
-if (roleGGO && membre.roles.cache.has(roleGGO.id)) {
-    return interaction.reply("⛔ Ce membre est exclu de la compta.");
-}
-
-
     if (interaction.commandName === 'quota') {
         const membre = interaction.options.getUser('membre');
+        const m = interaction.guild.members.cache.get(membre.id);
+
+        // ❌ Exclure GGO
+        if (roleGGO && m.roles.cache.has(roleGGO.id)) {
+            return interaction.reply("⛔ Ce membre est exclu de la compta.");
+        }
 
         let recoltes = 0;
         let labos = 0;
@@ -238,9 +256,8 @@ if (roleGGO && membre.roles.cache.has(roleGGO.id)) {
             }
 
             if (entry.type === "labo" && entry.participants.includes(membre.id)) {
-    labos++; // ✔ compte 1 labo par action
-}
-
+                labos++; // ✔ 1 labo = 1 action
+            }
         }
 
         return interaction.reply(
@@ -254,45 +271,39 @@ if (roleGGO && membre.roles.cache.has(roleGGO.id)) {
     // /allcompta
     // ----------------------
     if (interaction.commandName === 'allcompta') {
-        const membres = await interaction.guild.members.fetch(); // ⭐ fonctionne maintenant
+        const membres = await interaction.guild.members.fetch();
 
         const quotas = {};
 
         membres.forEach(m => {
-    if (m.user.bot) return;
+            if (m.user.bot) return;
 
-    // ❌ Exclure le rôle GGO
-    const roleGGO = interaction.guild.roles.cache.find(r => r.name === "GGO");
-    if (roleGGO && m.roles.cache.has(roleGGO.id)) return;
+            // ❌ Exclure GGO
+            if (roleGGO && m.roles.cache.has(roleGGO.id)) return;
 
-    quotas[m.id] = { recoltes: 0, labos: 0 };
-});
-
+            quotas[m.id] = { recoltes: 0, labos: 0 };
+        });
 
         for (const entry of compta) {
             if (entry.type === "recolte") {
+                const m = membres.get(entry.user);
+                if (!m) continue;
+
+                if (roleGGO && m.roles.cache.has(roleGGO.id)) continue;
+
                 quotas[entry.user].recoltes += entry.quantite;
             }
 
             if (entry.type === "labo") {
-    for (const participant of entry.participants) {
+                for (const participant of entry.participants) {
+                    const m = membres.get(participant);
+                    if (!m) continue;
 
-    // Récupérer le membre dans le serveur
-    const membre = membres.get(participant);
+                    if (roleGGO && m.roles.cache.has(roleGGO.id)) continue;
 
-    // Trouver le rôle GGO
-    const roleGGO = interaction.guild.roles.cache.find(r => r.name === "GGO");
-
-    // ❌ Si le membre a le rôle GGO → on ignore
-    if (roleGGO && membre.roles.cache.has(roleGGO.id)) continue;
-
-    // ✔ Sinon → on compte normalement
-    if (!quotas[participant]) quotas[participant] = { recoltes: 0, labos: 0 };
-    quotas[participant].labos++;
-}
-
-}
-
+                    quotas[participant].labos++;
+                }
+            }
         }
 
         let msg = "📊 **Compta globale du serveur**\n\n";
@@ -322,16 +333,6 @@ if (roleGGO && membre.roles.cache.has(roleGGO.id)) {
             "Cocaïne": 320,
             "Mexicana": 210
         };
-
-        if (stock[produit] < quantite) {
-            return interaction.reply(
-                `❌ Stock insuffisant pour vendre **${quantite} ${produit}**.\n` +
-                `Stock actuel : **${stock[produit]}**`
-            );
-        }
-
-        stock[produit] -= quantite;
-        saveStock(stock);
 
         const total = prix[produit] * quantite;
 
