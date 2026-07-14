@@ -202,7 +202,7 @@ client.on('interactionCreate', async interaction => {
         `• Produit : **${produit}**\n` +
         `• Quantité : **${quantite}**\n` +
         `• Participants : ${participantsRaw}\n` +
-        `• Heure : ${new Date().toLocaleTimeString()}\n\n` +
+        `• Heure : ${new Date().toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris' })}\n\n` +
         `Stock mis à jour ✔️`
     );
 }
