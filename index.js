@@ -5,6 +5,14 @@ console.log("TOKEN =", JSON.stringify(process.env.TOKEN));
 const fs = require('fs');
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const stock = require('./commands/stock');
+const recolte = require('./commands/recolte');
+const maj = require('./commands/maj');
+
+commands.set(stock.name, stock);
+commands.set(recolte.name, recolte);
+commands.set(maj.name, maj);
+
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds],

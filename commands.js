@@ -1,4 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
+const maj = require('./commands/maj');
+
 
 module.exports = [
     new SlashCommandBuilder()
@@ -20,8 +22,10 @@ module.exports = [
                     { name: 'Acide Sulfurique', value: 'Acide Sulfurique' },
                     { name: 'Amanita Rouge', value: 'Amanita Rouge' },
                     { name: 'Amanita Vert', value: 'Amanita Vert' }
-                )
+             )
+                
         )
+
         .addIntegerOption(option =>
             option.setName('quantite')
                 .setDescription('Quantité')
@@ -97,6 +101,18 @@ new SlashCommandBuilder()
 new SlashCommandBuilder()
     .setName('nukecompta')
     .setDescription('Réinitialise toute la compta (récoltes + labos)'),
+
+    new SlashCommandBuilder()
+        .setName('maj')
+        .setDescription('Met à jour une matière première ou un produit fini')
+        .addStringOption(option =>
+            option.setName('item')
+                .setDescription('Nom de la matière ou du produit')
+                .setRequired(true))
+        .addIntegerOption(option =>
+            option.setName('quantite')
+                .setDescription('Quantité à ajouter ou retirer')
+                .setRequired(true)),
 
 
 ];
