@@ -9,6 +9,9 @@ const stock = require('./commands/stock');
 const recolte = require('./commands/recolte');
 const maj = require('./commands/maj');
 
+const commands = new Map();
+
+
 commands.set(stock.name, stock);
 commands.set(recolte.name, recolte);
 commands.set(maj.name, maj);
