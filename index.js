@@ -73,8 +73,8 @@ client.on('interactionCreate', async interaction => {
     const stock = loadStock();
     const compta = loadCompta();
 
-    // Rôle GGO
-    const roleGGO = interaction.guild.roles.cache.find(r => r.name === "GGO");
+    // Rôle Madrazo X
+    const roleMadrazo = interaction.guild.roles.cache.find(r => r.name === "Madrazo X");
 
     // ----------------------
     // /stock
@@ -107,10 +107,11 @@ client.on('interactionCreate', async interaction => {
         const quantite = interaction.options.getInteger('quantite');
         const personne = interaction.options.getUser('personne');
 
-        // ❌ Exclure GGO
-        const membre = interaction.guild.members.cache.get(personne.id);
-        if (roleGGO && membre.roles.cache.has(roleGGO.id)) {
-            return interaction.reply("⛔ Ce membre est exclu de la compta.");
+        const membreGuild = interaction.guild.members.cache.get(personne.id);
+
+        // ❌ Seuls les Madrazo X sont comptés
+        if (!roleMadrazo || !membreGuild.roles.cache.has(roleMadrazo.id)) {
+            return interaction.reply("⛔ Ce membre n'est pas Madrazo X.");
         }
 
         stock[matiere] += quantite;
@@ -198,15 +199,16 @@ client.on('interactionCreate', async interaction => {
             );
         }
 
-        // ❌ Exclure GGO des participants
         const membres = await interaction.guild.members.fetch();
+
+        // ❌ Filtrer uniquement les Madrazo X
         const participantsFiltrés = participants.filter(id => {
             const m = membres.get(id);
-            return !(roleGGO && m.roles.cache.has(roleGGO.id));
+            return roleMadrazo && m.roles.cache.has(roleMadrazo.id);
         });
 
         if (participantsFiltrés.length === 0) {
-            return interaction.reply("⛔ Tous les participants sont GGO, labo ignoré.");
+            return interaction.reply("⛔ Aucun participant Madrazo X trouvé.");
         }
 
         for (const matiere in req) {
@@ -242,9 +244,9 @@ client.on('interactionCreate', async interaction => {
         const membre = interaction.options.getUser('membre');
         const m = interaction.guild.members.cache.get(membre.id);
 
-        // ❌ Exclure GGO
-        if (roleGGO && m.roles.cache.has(roleGGO.id)) {
-            return interaction.reply("⛔ Ce membre est exclu de la compta.");
+        // ❌ Seuls les Madrazo X sont comptés
+        if (!roleMadrazo || !m.roles.cache.has(roleMadrazo.id)) {
+            return interaction.reply("⛔ Ce membre n'est pas Madrazo X.");
         }
 
         let recoltes = 0;
@@ -278,8 +280,8 @@ client.on('interactionCreate', async interaction => {
         membres.forEach(m => {
             if (m.user.bot) return;
 
-            // ❌ Exclure GGO
-            if (roleGGO && m.roles.cache.has(roleGGO.id)) return;
+            // ❌ Seuls les Madrazo X sont comptés
+            if (!roleMadrazo || !m.roles.cache.has(roleMadrazo.id)) return;
 
             quotas[m.id] = { recoltes: 0, labos: 0 };
         });
@@ -289,7 +291,7 @@ client.on('interactionCreate', async interaction => {
                 const m = membres.get(entry.user);
                 if (!m) continue;
 
-                if (roleGGO && m.roles.cache.has(roleGGO.id)) continue;
+                if (!roleMadrazo || !m.roles.cache.has(roleMadrazo.id)) continue;
 
                 quotas[entry.user].recoltes += entry.quantite;
             }
@@ -299,7 +301,7 @@ client.on('interactionCreate', async interaction => {
                     const m = membres.get(participant);
                     if (!m) continue;
 
-                    if (roleGGO && m.roles.cache.has(roleGGO.id)) continue;
+                    if (!roleMadrazo || !m.roles.cache.has(roleMadrazo.id)) continue;
 
                     quotas[participant].labos++;
                 }
