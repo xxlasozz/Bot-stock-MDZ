@@ -218,8 +218,8 @@ if (interaction.commandName === 'quota') {
 
     for (const entry of compta) {
         if (entry.type === "recolte" && entry.user === membre.id) {
-            recoltes++;
-        }
+    recoltes += entry.quantite; // ✔ additionne la quantité
+}
 
         if (entry.type === "labo" && entry.participants.includes(membre.id)) {
             labos++;
@@ -250,7 +250,8 @@ if (interaction.commandName === 'allcompta') {
     for (const entry of compta) {
         if (entry.type === "recolte") {
             if (!quotas[entry.user]) quotas[entry.user] = { recoltes: 0, labos: 0 };
-            quotas[entry.user].recoltes++;
+            quotas[entry.user].recoltes += entry.quantite; // ✔ additionne la quantité
+
         }
 
         if (entry.type === "labo") {
