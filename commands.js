@@ -18,9 +18,6 @@ module.exports = [
                     { name: 'Belladone', value: 'Belladone' },
                     { name: 'Feuilles', value: 'Feuilles' },
                     { name: 'Acide Sulfurique', value: 'Acide Sulfurique' },
-                    { name: 'Amanita Rouge', value: 'Amanita Rouge' },
-                    { name: 'Amanita Vert', value: 'Amanita Vert' },
-                    
                 ))
         .addIntegerOption(option =>
             option.setName('quantite')
@@ -43,5 +40,3 @@ module.exports = [
                 .setDescription('Quantité à ajouter ou retirer')
                 .setRequired(true)),
 ];
-
-

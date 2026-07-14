@@ -13,23 +13,6 @@ const client = new Client({
 });
 
 // ----------------------
-// LISTENER COMMANDES SLASH
-// ----------------------
-client.on('interactionCreate', async interaction => {
-    if (!interaction.isChatInputCommand()) return;
-
-    // 👉 Ici tu mets :
-    // /stock
-    // /recolte
-    // /labo
-    // /quota
-    // /allcompta
-    // /transac
-    // /nukecompta
-});
-
-
-// ----------------------
 // LISTENER BOUTONS
 // ----------------------
 client.on('interactionCreate', async interaction => {
@@ -129,6 +112,29 @@ client.on('interactionCreate', async interaction => {
         );
     }
 
+    if (interaction.commandName === 'maj') {
+    const item = interaction.options.getString('item');
+    const quantite = interaction.options.getInteger('quantite');
+
+    const stock = loadStock();
+
+    if (stock[item] === undefined) {
+        return interaction.reply(`❌ L'item **${item}** n'existe pas dans le stock.`);
+    }
+
+    stock[item] += quantite;
+
+    if (stock[item] < 0) stock[item] = 0;
+
+    saveStock(stock);
+
+    return interaction.reply(
+        `🔧 Mise à jour effectuée :\n\n` +
+        `• Item : **${item}**\n` +
+        `• Nouvelle quantité : **${stock[item]}**`
+    );
+}
+
     if (interaction.commandName === 'labo') {
     const produit = interaction.options.getString('produit');
     const quantite = interaction.options.getInteger('quantite');
@@ -153,29 +159,6 @@ client.on('interactionCreate', async interaction => {
                 `❌ Stock insuffisant pour produire **${quantite} ${produit}**.\n` +
                 `Il manque : **${matiere}**`
             );
-
-            if (interaction.commandName === 'maj') {
-    const item = interaction.options.getString('item');
-    const quantite = interaction.options.getInteger('quantite');
-
-    const stock = loadStock();
-
-    if (stock[item] === undefined) {
-        return interaction.reply(`❌ L'item **${item}** n'existe pas dans le stock.`);
-    }
-
-    stock[item] += quantite;
-
-    if (stock[item] < 0) stock[item] = 0;
-
-    saveStock(stock);
-
-    return interaction.reply(
-        `🔧 Mise à jour effectuée :\n\n` +
-        `• Item : **${item}**\n` +
-        `• Nouvelle quantité : **${stock[item]}**`
-    );
-}
 
         }
     }
