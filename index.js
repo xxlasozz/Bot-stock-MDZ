@@ -1,4 +1,7 @@
-require('dotenv').config();
+require('./dotenv.config');
+
+console.log("TOKEN =", JSON.stringify(process.env.TOKEN));
+
 const fs = require('fs');
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
@@ -361,5 +364,6 @@ client.on('interactionCreate', async interaction => {
 
 
 });
+console.log("TOKEN =", process.env.TOKEN);
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(process.env.TOKEN);
