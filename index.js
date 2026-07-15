@@ -193,11 +193,12 @@ client.on('interactionCreate', async interaction => {
         }
 
         if (participants.length === 0) {
-            return interaction.reply(
-                "❌ Aucun participant trouvé.\n" +
-                "Utilise des **mentions** (ex: @Marine @La)."
-            );
-        }
+    return interaction.reply(
+        "❌ Aucun participant trouvé.\n" +
+        "Utilise des **mentions**."
+    );
+}
+
 
         const membres = await interaction.guild.members.fetch();
 
