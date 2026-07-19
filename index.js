@@ -3,8 +3,54 @@ require('./dotenv.config');
 console.log("TOKEN =", JSON.stringify(process.env.TOKEN));
 
 const fs = require('fs');
+const path = require('path');
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+
+// ----------------------
+// CHEMIN PERSISTANT RAILWAY
+// ----------------------
+const DATA_DIR = "/mnt/data";
+const STOCK_PATH = path.join(DATA_DIR, "stock.json");
+const COMPTA_PATH = path.join(DATA_DIR, "compta.json");
+
+// ----------------------
+// CRÉATION DES FICHIERS SI ABSENTS
+// ----------------------
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
+if (!fs.existsSync(STOCK_PATH)) fs.writeFileSync(STOCK_PATH, JSON.stringify({
+    "Fentanyl": 0,
+    "Xylazine": 0,
+    "Belladone": 0,
+    "Feuilles": 0,
+    "Acide Sulfurique": 0,
+    "Amanita Rouge": 0,
+    "Amanita Vert": 0,
+    "Tranq": 0,
+    "Cocaïne": 0,
+    "Mexicana": 0
+}, null, 2));
+
+if (!fs.existsSync(COMPTA_PATH)) fs.writeFileSync(COMPTA_PATH, JSON.stringify([], null, 2));
+
+// ----------------------
+// FONCTIONS STOCK & COMPTA
+// ----------------------
+function loadStock() {
+    return JSON.parse(fs.readFileSync(STOCK_PATH));
+}
+
+function saveStock(stock) {
+    fs.writeFileSync(STOCK_PATH, JSON.stringify(stock, null, 2));
+}
+
+function loadCompta() {
+    return JSON.parse(fs.readFileSync(COMPTA_PATH));
+}
+
+function saveCompta(compta) {
+    fs.writeFileSync(COMPTA_PATH, JSON.stringify(compta, null, 2));
+}
 
 const client = new Client({
     intents: [
@@ -13,25 +59,6 @@ const client = new Client({
     ],
     partials: [Partials.Channel]
 });
-
-// ----------------------
-// FONCTIONS STOCK & COMPTA
-// ----------------------
-function loadStock() {
-    return JSON.parse(fs.readFileSync('stock.json'));
-}
-
-function saveStock(stock) {
-    fs.writeFileSync('stock.json', JSON.stringify(stock, null, 2));
-}
-
-function loadCompta() {
-    return JSON.parse(fs.readFileSync('compta.json'));
-}
-
-function saveCompta(compta) {
-    fs.writeFileSync('compta.json', JSON.stringify(compta, null, 2));
-}
 
 client.on('ready', () => {
     console.log(`Bot connecté en tant que ${client.user.tag}`);
@@ -42,9 +69,6 @@ client.on('ready', () => {
 // ----------------------
 client.on('interactionCreate', async interaction => {
 
-    // ----------------------
-    // BOUTONS
-    // ----------------------
     if (interaction.isButton()) {
 
         if (interaction.customId === 'nuke_confirm') {
@@ -65,15 +89,11 @@ client.on('interactionCreate', async interaction => {
         return;
     }
 
-    // ----------------------
-    // COMMANDES SLASH
-    // ----------------------
     if (!interaction.isChatInputCommand()) return;
 
     const stock = loadStock();
     const compta = loadCompta();
 
-    // Rôle Madrazo X
     const roleMadrazo = interaction.guild.roles.cache.find(r => r.name === "Madrazo X");
 
     // ----------------------
@@ -109,7 +129,6 @@ client.on('interactionCreate', async interaction => {
 
         const membreGuild = interaction.guild.members.cache.get(personne.id);
 
-        // ❌ Seuls les Madrazo X sont comptés
         if (!roleMadrazo || !membreGuild.roles.cache.has(roleMadrazo.id)) {
             return interaction.reply("⛔ Ce membre n'est pas Madrazo X.");
         }
@@ -193,16 +212,14 @@ client.on('interactionCreate', async interaction => {
         }
 
         if (participants.length === 0) {
-    return interaction.reply(
-        "❌ Aucun participant trouvé.\n" +
-        "Utilise des **mentions**."
-    );
-}
-
+            return interaction.reply(
+                "❌ Aucun participant trouvé.\n" +
+                "Utilise des **mentions**."
+            );
+        }
 
         const membres = await interaction.guild.members.fetch();
 
-        // ❌ Filtrer uniquement les Madrazo X
         const participantsFiltrés = participants.filter(id => {
             const m = membres.get(id);
             return roleMadrazo && m.roles.cache.has(roleMadrazo.id);
@@ -245,7 +262,6 @@ client.on('interactionCreate', async interaction => {
         const membre = interaction.options.getUser('membre');
         const m = interaction.guild.members.cache.get(membre.id);
 
-        // ❌ Seuls les Madrazo X sont comptés
         if (!roleMadrazo || !m.roles.cache.has(roleMadrazo.id)) {
             return interaction.reply("⛔ Ce membre n'est pas Madrazo X.");
         }
@@ -259,7 +275,7 @@ client.on('interactionCreate', async interaction => {
             }
 
             if (entry.type === "labo" && entry.participants.includes(membre.id)) {
-                labos++; // ✔ 1 labo = 1 action
+                labos++;
             }
         }
 
@@ -281,7 +297,6 @@ client.on('interactionCreate', async interaction => {
         membres.forEach(m => {
             if (m.user.bot) return;
 
-            // ❌ Seuls les Madrazo X sont comptés
             if (!roleMadrazo || !m.roles.cache.has(roleMadrazo.id)) return;
 
             quotas[m.id] = { recoltes: 0, labos: 0 };
