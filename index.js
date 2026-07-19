@@ -1,7 +1,5 @@
 require('./dotenv.config');
 
-console.log("TOKEN =", JSON.stringify(process.env.TOKEN));
-
 const fs = require('fs');
 const path = require('path');
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
@@ -18,20 +16,25 @@ const COMPTA_PATH = path.join(DATA_DIR, "compta.json");
 // CRÉATION DES FICHIERS SI ABSENTS
 // ----------------------
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
-if (!fs.existsSync(STOCK_PATH)) fs.writeFileSync(STOCK_PATH, JSON.stringify({
-    "Fentanyl": 0,
-    "Xylazine": 0,
-    "Belladone": 0,
-    "Feuilles": 0,
-    "Acide Sulfurique": 0,
-    "Amanita Rouge": 0,
-    "Amanita Vert": 0,
-    "Tranq": 0,
-    "Cocaïne": 0,
-    "Mexicana": 0
-}, null, 2));
 
-if (!fs.existsSync(COMPTA_PATH)) fs.writeFileSync(COMPTA_PATH, JSON.stringify([], null, 2));
+if (!fs.existsSync(STOCK_PATH)) {
+    fs.writeFileSync(STOCK_PATH, JSON.stringify({
+        "Fentanyl": 0,
+        "Xylazine": 0,
+        "Belladone": 0,
+        "Feuilles": 0,
+        "Acide Sulfurique": 0,
+        "Amanita Rouge": 0,
+        "Amanita Vert": 0,
+        "Tranq": 0,
+        "Cocaïne": 0,
+        "Mexicana": 0
+    }, null, 2));
+}
+
+if (!fs.existsSync(COMPTA_PATH)) {
+    fs.writeFileSync(COMPTA_PATH, JSON.stringify([], null, 2));
+}
 
 // ----------------------
 // FONCTIONS STOCK & COMPTA
@@ -407,5 +410,4 @@ client.on('interactionCreate', async interaction => {
 // ----------------------
 // LOGIN
 // ----------------------
-console.log("TOKEN =", process.env.TOKEN);
 client.login(process.env.TOKEN);
