@@ -332,7 +332,7 @@ client.on('interactionCreate', async interaction => {
         const groupe = interaction.options.getString('groupe');
 
         const prix = {
-            "Tranq": 110,
+            "Tranq": 130,
             "Cocaïne": 320,
             "Mexicana": 210
         };
