@@ -87,7 +87,7 @@ module.exports = [
                 .setRequired(true))
         .addStringOption(option =>
             option.setName('participants')
-                .setDescription('Mentions des participants (ex: @La @Marine)')
+                .setDescription('Mentions des participants')
                 .setRequired(true)),
 
     // -------------------------

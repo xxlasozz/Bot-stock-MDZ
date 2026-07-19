@@ -6,16 +6,23 @@ const { Client, GatewayIntentBits, Partials } = require('discord.js');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
 // ----------------------
-// CHEMIN PERSISTANT RAILWAY
+// DÉTECTION ENVIRONNEMENT
 // ----------------------
-const DATA_DIR = "/mnt/data";
+const IS_RAILWAY = process.env.RAILWAY_ENVIRONMENT !== undefined;
+
+// ----------------------
+// CHEMINS SELON ENVIRONNEMENT
+// ----------------------
+const DATA_DIR = IS_RAILWAY ? "/mnt/data" : "./";
 const STOCK_PATH = path.join(DATA_DIR, "stock.json");
 const COMPTA_PATH = path.join(DATA_DIR, "compta.json");
 
 // ----------------------
 // CRÉATION DES FICHIERS SI ABSENTS
 // ----------------------
-if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
+if (IS_RAILWAY && !fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR);
+}
 
 if (!fs.existsSync(STOCK_PATH)) {
     fs.writeFileSync(STOCK_PATH, JSON.stringify({
@@ -55,6 +62,9 @@ function saveCompta(compta) {
     fs.writeFileSync(COMPTA_PATH, JSON.stringify(compta, null, 2));
 }
 
+// ----------------------
+// CLIENT DISCORD
+// ----------------------
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -356,6 +366,13 @@ client.on('interactionCreate', async interaction => {
         };
 
         const total = prix[produit] * quantite;
+
+        // Retirer du stock le produit vendu
+        if (stock[produit] !== undefined) {
+            stock[produit] -= quantite;
+            if (stock[produit] < 0) stock[produit] = 0;
+            saveStock(stock);
+        }
 
         compta.push({
             type: "transac",
